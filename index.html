@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taigen 出勤管理系統</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;   
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+      background: linear-gradient(135deg, #d7dbea 0%, #777578 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 60px 40px;
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1.1em;
+      margin-bottom: 50px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 15px;
+      padding: 30px 20px;
+      text-decoration: none;
+      color: #333;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border-color: #667eea;
+    }
+
+    .feature-icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .feature-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .feature-desc {
+      font-size: 0.9em;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .footer {
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid #eee;
+      color: #999;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 40px 20px;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📚 Taigen 出勤管理系統</h1>
+    <p class="subtitle">完整的出勤管理解決方案</p>
+
+    <div class="features">
+      <a href="admin.html" class="feature-card">
+        <span class="feature-icon">👨‍🏫</span>
+        <div class="feature-title">老師後台點名</div>
+        <div class="feature-desc">管理班級與學生<br>記錄每日出缺席</div>
+      </a>
+
+      <a href="calendar.html" class="feature-card">
+        <span class="feature-icon">📅</span>
+        <div class="feature-title">月曆式記錄</div>
+        <div class="feature-desc">以月曆方式查看<br>和編輯出缺席記錄</div>
+      </a>
+
+      <a href="viewer.html" class="feature-card">
+        <span class="feature-icon">📊</span>
+        <div class="feature-title">出勤總覽</div>
+        <div class="feature-desc">查看出勤統計<br>支援 Excel 匯出</div>
+      </a>
+
+      <a href="payment.html" class="feature-card">
+        <span class="feature-icon">💰</span>
+        <div class="feature-title">請款系統</div>
+        <div class="feature-desc">自動生成請款單<br>支援 PDF 匯出</div>
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>使用 Firebase 作為後端資料庫</p>
+      <p style="margin-top: 10px;">© 2024 Taigen Attendance System</p>
+    </div>
+  </div>
+</body>
+</html>
+

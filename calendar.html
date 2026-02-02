@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>月曆式出缺席記錄</title>
+  <link rel="stylesheet" href="css/calendar.css">
+</head>
+<body>
+  <div class="calendar-container">
+    <header class="calendar-header">
+      <h1>月曆式出缺席記錄</h1>
+      <div class="controls">
+        <div class="control-group">
+          <label for="month-select-calendar">月份</label>
+          <div class="month-selector">
+            <input type="month" id="month-select-calendar" class="month-input">
+            <div class="month-slider" id="month-slider">
+              <!-- 動態生成 1-12 月按鈕 -->
+            </div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label for="class-select-calendar">班級</label>
+          <select id="class-select-calendar" class="class-select">
+            <option value="">載入中...</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <button id="save-calendar-btn" class="save-btn" disabled>儲存變更</button>
+        </div>
+      </div>
+      <div class="status-info">
+        <span id="progress-text-calendar">已完成: 0 / 0</span>
+        <span id="unsaved-warning" class="unsaved-warning" style="display: none;">⚠️ 有未儲存的變更</span>
+      </div>
+    </header>
+
+    <main class="calendar-content" id="calendar-content">
+      <div class="loading">載入中...</div>
+    </main>
+  </div>
+
+  <script type="module" src="js/calendar.js"></script>
+</body>
+</html>
+

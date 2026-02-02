@@ -1,0 +1,410 @@
+/* 整體容器 */
+.viewer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 頂部控制區 */
+.viewer-header {
+  background: #fff;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.viewer-header h1 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.8rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.month-input,
+.class-select {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  min-width: 200px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.month-input:focus,
+.class-select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.export-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.export-btn:hover {
+  background: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 內容區 */
+.viewer-content {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+
+/* 班級表格 */
+.class-table-section {
+  margin-bottom: 3rem;
+}
+
+.class-table-section:last-child {
+  margin-bottom: 0;
+}
+
+.class-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.class-table-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.toggle-week-total-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: #95a5a6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-week-total-btn:hover {
+  background: #7f8c8d;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toggle-week-total-btn:active {
+  transform: translateY(0);
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  table-layout: fixed; /* 固定表格佈局，讓列寬更可控 */
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 0.5rem 0.4rem;
+  text-align: center;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+}
+
+.attendance-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* 兩行表頭樣式 */
+.attendance-table .header-row-date th {
+  background: #e8f4f8;
+  border-bottom: 2px solid #3498db;
+  padding: 0.4rem 0.3rem;
+}
+
+.attendance-table .header-row-weekday th {
+  background: #f8f9fa;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.3rem;
+  color: #666;
+  border-top: 1px solid #ddd;
+}
+
+/* 非當月日期（上個月或下個月的日期） */
+.attendance-table th.non-month-day,
+.attendance-table td.non-month-day {
+  background: #f5f5f5;
+  color: #bbb;
+  border-color: #e8e8e8;
+}
+
+/* 非上課天（當月但非該班級上課天） */
+.attendance-table th.non-class-day,
+.attendance-table td.non-class-day {
+  background: #fafafa;
+  color: #999;
+  border-color: #e8e8e8;
+}
+
+.attendance-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.attendance-table .student-name {
+  text-align: left;
+  font-weight: 600;
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.3;
+  padding: 0.5rem 0.3rem;
+}
+
+/* 狀態顯示 */
+.status-present {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.status-absent {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.status-leave {
+  color: #f39c12;
+  font-weight: 600;
+}
+
+/* 週總計和月總計 */
+.week-total,
+.month-total {
+  background: #f8f9fa;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+.month-total {
+  background: #e8f4f8;
+}
+
+/* Week Total 折疊功能 */
+.attendance-table.hide-week-total th.week-total,
+.attendance-table.hide-week-total td.week-total {
+  display: none;
+}
+
+/* 表頭 tooltip 樣式 */
+.attendance-table th.tooltip-header {
+  cursor: help;
+  position: relative;
+}
+
+/* 自定義 tooltip - 顯示在元素上方 */
+.attendance-table th.tooltip-header::after {
+  content: attr(data-title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: #2c3e50;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: normal;
+  white-space: nowrap;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Tooltip 箭頭 */
+.attendance-table th.tooltip-header::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  border: 5px solid transparent;
+  border-top-color: #2c3e50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 1001;
+}
+
+/* 顯示 tooltip */
+.attendance-table th.tooltip-header:hover::after,
+.attendance-table th.tooltip-header:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+/* 響應式設計 */
+/* 中等螢幕（1400px - 1920px）：保留適當邊距 */
+@media screen and (max-width: 1920px) {
+  .viewer-container {
+    max-width: calc(100% - 3rem);
+    padding: 1rem;
+  }
+}
+
+/* 小螢幕（< 1400px）：使用全寬，減少 padding */
+@media screen and (max-width: 1400px) {
+  .viewer-container {
+    max-width: 100%;
+    padding: 0.75rem;
+  }
+
+  .viewer-header {
+    padding: 1.25rem;
+  }
+
+  .viewer-content {
+    padding: 1.25rem;
+  }
+}
+
+/* 平板和手機（< 768px）：進一步優化 */
+@media screen and (max-width: 768px) {
+  .viewer-container {
+    padding: 0.5rem;
+  }
+
+  .viewer-header {
+    padding: 1rem;
+  }
+
+  .viewer-header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .controls {
+    gap: 1rem;
+  }
+
+  .viewer-content {
+    padding: 1rem;
+  }
+
+  .class-table-title {
+    font-size: 1.1rem;
+  }
+
+  .attendance-table {
+    font-size: 0.75rem;
+  }
+
+  .attendance-table th,
+  .attendance-table td {
+    padding: 0.4rem 0.3rem;
+  }
+}
+
+/* 列印樣式 */
+@media print {
+  .viewer-container {
+    background: #fff;
+    padding: 0;
+  }
+
+  .viewer-header {
+    box-shadow: none;
+    border-bottom: 2px solid #000;
+    page-break-after: avoid;
+  }
+
+  .controls {
+    display: none;
+  }
+
+  .viewer-content {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .class-table-section {
+    page-break-inside: avoid;
+    margin-bottom: 2rem;
+  }
+
+  .attendance-table {
+    page-break-inside: auto;
+  }
+
+  .attendance-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}
+

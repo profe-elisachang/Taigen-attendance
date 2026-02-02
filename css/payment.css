@@ -1,0 +1,335 @@
+/* 整體容器 */
+.payment-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 頂部控制區 */
+.payment-header {
+  background: #fff;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.payment-header h1 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.8rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.month-input {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  min-width: 200px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.month-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.export-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.export-btn:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 請款單內容 */
+.payment-content {
+  background: #fff;
+  padding: 3rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+
+/* 請款單頂部 - 緊湊設計 */
+.payment-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.teacher-info,
+.payment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.info-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.info-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 600;
+  min-width: 100px;
+}
+
+.info-value {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  flex: 1;
+}
+
+.invoice-date-input {
+  font-size: 0.9rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+/* 課程列表表格 */
+.courses-section {
+  margin-bottom: 2rem;
+}
+
+.courses-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.courses-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.courses-table th,
+.courses-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.courses-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.courses-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.courses-table .course-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.courses-table .course-hours,
+.courses-table .course-rate,
+.courses-table .course-amount {
+  text-align: right;
+}
+
+.courses-table .course-amount {
+  font-weight: 600;
+}
+
+/* 總計區 */
+.payment-summary {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 300px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  font-size: 1rem;
+}
+
+.summary-label {
+  font-weight: 600;
+  color: #555;
+}
+
+.summary-value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.summary-total {
+  font-size: 1.2rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e0e0e0;
+  background: #fffacd;
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.summary-total .summary-label {
+  font-size: 1.2rem;
+}
+
+.summary-total .summary-value {
+  font-size: 1.3rem;
+  color: #e74c3c;
+}
+
+/* 列印樣式 - 優化為一頁 */
+@media print {
+  @page {
+    margin: 1cm;
+  }
+
+  .payment-container {
+    background: #fff;
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .payment-header {
+    box-shadow: none;
+    border-bottom: 2px solid #000;
+    page-break-after: avoid;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .controls {
+    display: none;
+  }
+
+  .payment-content {
+    box-shadow: none;
+    padding: 1rem;
+  }
+
+  .payment-top {
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .info-section-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+    min-width: 80px;
+  }
+
+  .info-value {
+    font-size: 0.8rem;
+  }
+
+  .courses-section {
+    margin-bottom: 1rem;
+  }
+
+  .courses-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .courses-table {
+    font-size: 0.85rem;
+  }
+
+  .courses-table th,
+  .courses-table td {
+    padding: 0.5rem;
+  }
+
+  .payment-summary {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+
+  .summary-row {
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  .summary-total {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+}
+

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Request</title>
+  <link rel="stylesheet" href="css/payment.css">
+</head>
+<body>
+  <div class="payment-container">
+    <header class="payment-header">
+      <h1>Payment Request</h1>
+      <div class="controls">
+        <div class="control-group">
+          <label for="month-select-payment">Month</label>
+          <input type="month" id="month-select-payment" class="month-input">
+        </div>
+        <div class="control-group">
+          <button id="export-pdf-btn" class="export-btn">Export PDF</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="payment-content" id="payment-content">
+      <div class="loading">Loading...</div>
+    </main>
+  </div>
+
+  <script type="module" src="js/payment.js"></script>
+</body>
+</html>
+

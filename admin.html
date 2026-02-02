@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>老師後台點名系統</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-container">
+    <!-- 頂部控制區 -->
+    <header class="admin-header">
+      <h1>老師後台點名系統</h1>
+      <div class="controls">
+        <div class="control-group">
+          <label for="date-picker">日期</label>
+          <input type="date" id="date-picker" class="date-input">
+        </div>
+        <div class="control-group">
+          <label for="class-select">班級</label>
+          <div class="class-select-wrapper">
+            <select id="class-select" class="class-select">
+              <option value="">載入中...</option>
+            </select>
+            <button id="manage-class-btn" class="manage-btn" title="管理班級">
+              ⚙️
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 班級管理 Modal -->
+    <div id="class-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-title">管理班級</h2>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <!-- 新增班級表單 -->
+          <div class="form-section">
+            <h3>新增班級</h3>
+            <div class="form-group">
+              <label for="new-class-id">班級 ID</label>
+              <input type="text" id="new-class-id" placeholder="例如: en_inter, ch_basic" class="form-input">
+              <small>建議格式: 語言_程度 (例如: en_inter, ch_basic)</small>
+            </div>
+            <div class="form-group">
+              <label for="new-class-name">班級名稱</label>
+              <input type="text" id="new-class-name" placeholder="例如: Taigene English Class: Intermediate" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="new-class-hour-rate">時薪</label>
+              <input type="number" id="new-class-hour-rate" placeholder="400" class="form-input" value="400" min="0">
+              <small>此班級的時薪（用於請款計算）</small>
+            </div>
+            <div class="form-group">
+              <label>上課天數</label>
+              <div class="weekday-checkboxes" id="new-class-weekdays">
+                <label class="checkbox-label">
+                  <input type="checkbox" value="1" checked> 週一
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="2" checked> 週二
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="3" checked> 週三
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="4" checked> 週四
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" value="5" checked> 週五
+                </label>
+              </div>
+              <small>選擇此班級的上課天數（用於計算預定時數）</small>
+            </div>
+            <button id="add-class-btn" class="form-btn primary">新增班級</button>
+          </div>
+
+          <!-- 編輯班級列表 -->
+          <div class="form-section">
+            <h3>編輯班級</h3>
+            <div id="class-list" class="class-list">
+              <!-- 動態生成班級列表 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 老師出席按鈕 -->
+    <div class="teacher-present-section">
+      <button id="mark-teacher-present-btn" class="mark-teacher-present-btn" title="標記老師出席（即使沒有記錄學生出缺席）">
+        <span class="check-icon">✓</span>
+        <span class="btn-text">標記老師出席</span>
+      </button>
+    </div>
+
+    <!-- 學生列表區 -->
+    <div class="student-section">
+      <div class="student-section-header" id="student-section-header" style="display: none;">
+        <h2 id="current-class-name">學生列表</h2>
+        <button id="manage-student-btn" class="manage-student-btn">管理學生</button>
+      </div>
+      <main class="student-list" id="student-list">
+        <!-- 動態生成學生卡片 -->
+      </main>
+    </div>
+
+    <!-- 學生管理 Modal -->
+    <div id="student-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="student-modal-title">管理學生</h2>
+          <button class="modal-close" id="student-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <!-- 新增學生表單 -->
+          <div class="form-section">
+            <h3>新增學生</h3>
+            <div class="form-group">
+              <label for="new-student-name">學生姓名</label>
+              <input type="text" id="new-student-name" placeholder="例如: ARACELI" class="form-input">
+            </div>
+            <button id="add-student-btn" class="form-btn primary">新增學生</button>
+          </div>
+
+          <!-- 編輯學生列表 -->
+          <div class="form-section">
+            <h3>學生列表</h3>
+            <div id="student-list-modal" class="student-list-modal">
+              <!-- 動態生成學生列表 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部狀態區 -->
+    <footer class="admin-footer">
+      <div class="progress">
+        <span id="progress-text">已完成: 0 / 0</span>
+      </div>
+      <div class="footer-buttons">
+        <button id="save-btn" class="save-btn" disabled>儲存變更</button>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
+

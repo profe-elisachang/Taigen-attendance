@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Overview</title>
+  <link rel="stylesheet" href="css/viewer.css">
+</head>
+<body>
+  <div class="viewer-container">
+    <header class="viewer-header">
+      <h1>Attendance Overview</h1>
+      <div class="controls">
+        <div class="control-group">
+          <label for="month-select">Month</label>
+          <input type="month" id="month-select" class="month-input">
+        </div>
+        <div class="control-group">
+          <label for="class-select-viewer">Class</label>
+          <select id="class-select-viewer" class="class-select">
+            <option value="all">All Classes</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <button id="export-excel-btn" class="export-btn">Export Excel</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="viewer-content" id="viewer-content">
+      <div class="loading">Loading...</div>
+    </main>
+  </div>
+
+  <script type="module" src="js/viewer.js"></script>
+</body>
+</html>
+

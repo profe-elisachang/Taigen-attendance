@@ -1,0 +1,361 @@
+/* 整體容器 */
+.calendar-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 頂部控制區 */
+.calendar-header {
+  background: #fff;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.calendar-header h1 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.month-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.month-input {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  min-width: 200px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.month-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.month-slider {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.month-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 60px;
+}
+
+.month-btn:hover {
+  background: #f0f0f0;
+  border-color: #3498db;
+}
+
+.month-btn.active {
+  background: #3498db;
+  color: #fff;
+  border-color: #3498db;
+}
+
+.class-select {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  min-width: 250px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.class-select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.save-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.save-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.status-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.unsaved-warning {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* 內容區 */
+.calendar-content {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  overflow-x: auto;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+
+/* 月曆表格 */
+.calendar-table-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  table-layout: auto;
+}
+
+/* 固定左側學生欄位 */
+.calendar-table thead th:first-child,
+.calendar-table tbody td:first-child {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 10;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+}
+
+.calendar-table thead th.student-col {
+  background: #f8f9fa;
+  z-index: 15;
+}
+
+/* 固定頂部日期列 */
+.calendar-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-table thead th:first-child {
+  z-index: 15;
+}
+
+/* 第一行（日期）固定在頂部 */
+.calendar-table thead tr:first-child th {
+  top: 0;
+}
+
+/* 第二行（星期）固定在第一行下方 */
+.calendar-table thead tr:last-child th {
+  top: 40px; /* 約等於第一行的高度 */
+}
+
+/* 星期標題行 */
+.weekday-header {
+  background: #f0f0f0;
+  font-weight: 500;
+  color: #555;
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 0.85rem;
+}
+
+.weekday-header.weekend {
+  background: #e8e8e8;
+  color: #999;
+}
+
+/* 日期標題行 */
+.date-header {
+  background: #fff;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 0.5rem;
+  text-align: center;
+  border: 1px solid #ddd;
+  min-width: 50px;
+  white-space: nowrap;
+}
+
+.date-header.weekend {
+  background: #f0f0f0;
+  color: #999;
+}
+
+.date-header.today {
+  background: #e8f4f8;
+  color: #3498db;
+  font-weight: 700;
+}
+
+.date-header.teacher-present {
+  background: #d4edda;
+  border: 2px solid #28a745;
+  position: relative;
+}
+
+.date-header.teacher-present::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  color: #28a745;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* 學生名稱欄位 */
+.student-name-cell {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: 1px solid #ddd;
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+/* 記錄格子 */
+.attendance-cell {
+  padding: 0;
+  text-align: center;
+  border: 1px solid #ddd;
+  min-width: 50px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.attendance-cell:hover:not(.weekend):not(.readonly) {
+  background: #f0f8ff;
+  border-color: #3498db;
+}
+
+.attendance-cell.weekend {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.attendance-cell.present {
+  background: #d4edda;
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.attendance-cell.absent {
+  background: #f8d7da;
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.attendance-cell.leave {
+  background: #fff3cd;
+  color: #f39c12;
+  font-weight: 600;
+}
+
+.attendance-cell.readonly {
+  cursor: default;
+}
+
+/* 狀態顯示 */
+.cell-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1rem;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .calendar-container {
+    padding: 0.5rem;
+  }
+
+  .calendar-header {
+    padding: 1rem;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .month-slider {
+    justify-content: center;
+  }
+}
+
