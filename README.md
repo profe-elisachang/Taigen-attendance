@@ -19,7 +19,7 @@
 
 ```
 Taigen-attendance/
-├── admin.html          # 老師後台點名系統
+├── daily-attendance.html  # 老師後台點名系統
 ├── calendar.html       # 月曆式出缺席記錄
 ├── viewer.html         # 出勤總覽
 ├── payment.html        # 請款系統
@@ -35,7 +35,7 @@ Taigen-attendance/
 
 ## 使用說明
 
-1. 開啟 `admin.html` 進行每日點名
+1. 開啟 `daily-attendance.html` 進行每日點名
 2. 使用 `calendar.html` 查看和編輯月曆式記錄
 3. 在 `viewer.html` 查看統計並匯出 Excel
 4. 使用 `payment.html` 生成請款單並匯出 PDF

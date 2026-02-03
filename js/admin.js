@@ -40,7 +40,7 @@ const studentModalClose = document.getElementById('student-modal-close');
 const newStudentNameInput = document.getElementById('new-student-name');
 const addStudentBtn = document.getElementById('add-student-btn');
 const studentListModal = document.getElementById('student-list-modal');
-const markTeacherPresentBtn = document.getElementById('mark-teacher-present-btn');
+const markTeacherPresentToggle = document.getElementById('mark-teacher-present-toggle');
 
 // 狀態
 let currentDate = new Date().toISOString().split('T')[0];
@@ -64,7 +64,7 @@ async function init() {
   datePicker.addEventListener('change', handleDateChange);
   classSelect.addEventListener('change', handleClassChange);
   saveBtn.addEventListener('click', handleSave);
-  markTeacherPresentBtn.addEventListener('click', handleMarkTeacherPresent);
+  markTeacherPresentToggle.addEventListener('change', handleMarkTeacherPresent);
   manageClassBtn.addEventListener('click', openClassModal);
   modalClose.addEventListener('click', closeClassModal);
   addClassBtn.addEventListener('click', handleAddClass);
@@ -341,7 +341,7 @@ async function handleSave() {
   }
 }
 
-// 標記/取消標記老師出席
+// 標記/取消標記老師出席（Toggle Switch）
 async function handleMarkTeacherPresent() {
   console.log('=== 開始處理標記/取消標記老師出席 ===');
   console.log('currentClassId:', currentClassId);
@@ -349,6 +349,7 @@ async function handleMarkTeacherPresent() {
   
   if (!currentClassId) {
     alert('請先選擇班級');
+    markTeacherPresentToggle.checked = false;
     return;
   }
   
@@ -362,144 +363,134 @@ async function handleMarkTeacherPresent() {
   const existingAttendance = hasSession ? (sessionDoc.data().attendance || {}) : {};
   const hasStudentRecords = hasSession && Object.keys(existingAttendance).length > 0;
   
+  const isChecked = markTeacherPresentToggle.checked;
+  
   console.log('hasSession:', hasSession);
   console.log('existingAttendance:', existingAttendance);
   console.log('hasStudentRecords:', hasStudentRecords);
+  console.log('isChecked:', isChecked);
   
-  if (hasSession && hasStudentRecords) {
-    // 如果已有學生記錄，不能取消標記
-    alert('此日期已有學生出缺席記錄，無法取消標記老師出席');
-    return;
-  }
-  
-  if (hasSession) {
-    // 取消標記（刪除 session）
-    if (!confirm(`確定要取消標記 ${currentDate} 這天老師的出席嗎？\n（此操作會刪除該日期的 session 記錄）`)) {
+  if (isChecked) {
+    // 標記老師出席
+    if (hasSession && hasStudentRecords) {
+      // 如果已有學生記錄，自動勾選（因為已經有 session）
+      markTeacherPresentToggle.checked = true;
+      markTeacherPresentToggle.disabled = true;
       return;
     }
     
+    if (!hasSession) {
+      // 建立新的 session
+      try {
+        markTeacherPresentToggle.disabled = true;
+        
+        // 轉換日期字串為 timestamp
+        const dateTimestamp = new Date(currentDate + 'T00:00:00');
+        console.log('dateTimestamp:', dateTimestamp);
+        
+        const newData = {
+          date: dateTimestamp,
+          class_id: currentClassId,
+          paid_hours: 1,  // 固定為 1 小時
+          attendance: {},  // 空物件，表示沒有學生記錄
+          cancelled: false,  // 明確標記為未取消
+          updated_at: serverTimestamp()
+        };
+        console.log('準備寫入的資料:', newData);
+        
+        console.log('開始寫入 Firestore...');
+        await setDoc(sessionRef, newData, { merge: true });
+        console.log('✓ 寫入成功');
+        
+        // 驗證寫入是否成功
+        const verifyDoc = await getDoc(sessionRef);
+        if (!verifyDoc.exists()) {
+          throw new Error('寫入後驗證失敗：session 不存在於 Firestore');
+        }
+        console.log('✓ 驗證成功，session 已存在於 Firestore');
+        
+        markTeacherPresentToggle.disabled = false;
+        updateMarkTeacherPresentButton();
+        
+        // 顯示成功訊息
+        showMessage('✓ 已標記老師出席', 'success');
+        
+        // 重新載入出缺席記錄（更新顯示）
+        await loadAttendance();
+        renderStudents();
+        await updateMarkTeacherPresentButton();
+        console.log('=== 處理完成 ===');
+        
+      } catch (error) {
+        console.error('標記失敗:', error);
+        const errorMsg = error.message || error.code || '未知錯誤';
+        showMessage(`✗ 標記失敗: ${errorMsg}`, 'error');
+        markTeacherPresentToggle.checked = false;
+        markTeacherPresentToggle.disabled = false;
+        updateMarkTeacherPresentButton();
+      }
+    }
+  } else {
+    // 取消標記（刪除 session）
+    if (hasStudentRecords) {
+      // 如果已有學生記錄，不能取消標記
+      alert('此日期已有學生出缺席記錄，無法取消標記老師出席');
+      markTeacherPresentToggle.checked = true;
+      return;
+    }
+    
+    // ============================================
+    // 【可選刪除】取消標記確認彈窗
+    // 如果覺得 Toggle switch 的視覺回饋已足夠，可以刪除以下 4 行（442-445 行）
+    // 刪除後取消標記會直接執行，無需確認
+    // ============================================
+    if (!confirm(`確定要取消標記 ${currentDate} 這天老師的出席嗎？\n（此操作會刪除該日期的 session 記錄）`)) {
+      markTeacherPresentToggle.checked = true;
+      return;
+    }
+    // ============================================
+    
     try {
-      markTeacherPresentBtn.disabled = true;
-      markTeacherPresentBtn.textContent = '取消中...';
+      markTeacherPresentToggle.disabled = true;
       
       console.log('準備刪除 session:', sessionId);
       await deleteDoc(sessionRef);
       console.log('✓ 刪除成功');
       
       // 驗證刪除是否成功
-      console.log('驗證刪除是否成功...');
       const verifyDoc = await getDoc(sessionRef);
       if (verifyDoc.exists()) {
         throw new Error('刪除後驗證失敗：session 仍然存在於 Firestore');
       }
       console.log('✓ 驗證成功，session 已從 Firestore 刪除');
       
-      markTeacherPresentBtn.disabled = false;
+      markTeacherPresentToggle.disabled = false;
       updateMarkTeacherPresentButton();
       
       // 顯示成功訊息
       showMessage('✓ 已取消標記老師出席', 'success');
       
       // 重新載入出缺席記錄（更新顯示）
-      console.log('重新載入出缺席記錄...');
       await loadAttendance();
       renderStudents();
       await updateMarkTeacherPresentButton();
       console.log('=== 處理完成 ===');
       
     } catch (error) {
-      console.error('=== 取消標記失敗 - 完整錯誤資訊 ===');
-      console.error('錯誤物件:', error);
-      console.error('錯誤類型:', error.constructor.name);
-      console.error('錯誤代碼:', error.code);
-      console.error('錯誤訊息:', error.message);
-      console.error('錯誤堆疊:', error.stack);
-      
+      console.error('取消標記失敗:', error);
       const errorMsg = error.message || error.code || '未知錯誤';
       showMessage(`✗ 取消標記失敗: ${errorMsg}`, 'error');
-      markTeacherPresentBtn.disabled = false;
+      markTeacherPresentToggle.checked = true;
+      markTeacherPresentToggle.disabled = false;
       updateMarkTeacherPresentButton();
-      console.error('=== 錯誤處理完成 ===');
-    }
-  } else {
-    // 標記老師出席
-    if (!confirm(`確定要標記 ${currentDate} 這天老師有出席嗎？\n（即使沒有記錄任何學生的出缺席）`)) {
-      return;
-    }
-    
-    try {
-      markTeacherPresentBtn.disabled = true;
-      markTeacherPresentBtn.textContent = '標記中...';
-      
-      // 轉換日期字串為 timestamp
-      const dateTimestamp = new Date(currentDate + 'T00:00:00');
-      console.log('dateTimestamp:', dateTimestamp);
-      
-      const newData = {
-        date: dateTimestamp,
-        class_id: currentClassId,
-        paid_hours: 1,  // 固定為 1 小時
-        attendance: {},  // 空物件，表示沒有學生記錄
-        updated_at: serverTimestamp()
-      };
-      console.log('準備寫入的資料:', newData);
-      
-      console.log('開始寫入 Firestore...');
-      await setDoc(sessionRef, newData, { merge: true });
-      console.log('✓ 寫入成功');
-      
-      // 驗證寫入是否成功
-      console.log('驗證寫入是否成功...');
-      const verifyDoc = await getDoc(sessionRef);
-      if (!verifyDoc.exists()) {
-        throw new Error('寫入後驗證失敗：session 不存在於 Firestore');
-      }
-      console.log('✓ 驗證成功，session 已存在於 Firestore');
-      console.log('驗證的 session 資料:', verifyDoc.data());
-      
-      markTeacherPresentBtn.disabled = false;
-      updateMarkTeacherPresentButton();
-      
-      // 顯示成功訊息
-      showMessage('✓ 已標記老師出席', 'success');
-      
-      // 重新載入出缺席記錄（更新顯示）
-      console.log('重新載入出缺席記錄...');
-      await loadAttendance();
-      renderStudents();
-      await updateMarkTeacherPresentButton();
-      console.log('=== 處理完成 ===');
-      
-    } catch (error) {
-      console.error('=== 標記失敗 - 完整錯誤資訊 ===');
-      console.error('錯誤物件:', error);
-      console.error('錯誤類型:', error.constructor.name);
-      console.error('錯誤代碼:', error.code);
-      console.error('錯誤訊息:', error.message);
-      console.error('錯誤堆疊:', error.stack);
-      
-      if (error.code) {
-        console.error('Firestore 錯誤代碼:', error.code);
-        if (error.code === 'permission-denied') {
-          console.error('權限被拒絕！請檢查 Firestore security rules');
-        } else if (error.code === 'unavailable') {
-          console.error('Firestore 服務不可用，請檢查網路連線');
-        }
-      }
-      
-      const errorMsg = error.message || error.code || '未知錯誤';
-      showMessage(`✗ 標記失敗: ${errorMsg}`, 'error');
-      markTeacherPresentBtn.disabled = false;
-      updateMarkTeacherPresentButton();
-      console.error('=== 錯誤處理完成 ===');
     }
   }
 }
 
-// 更新標記老師出席按鈕的文字和狀態
+// 更新標記老師出席 Toggle Switch 的狀態
 async function updateMarkTeacherPresentButton() {
   if (!currentClassId) {
-    markTeacherPresentBtn.style.display = 'none';
+    markTeacherPresentToggle.style.display = 'none';
     return;
   }
   
@@ -510,20 +501,20 @@ async function updateMarkTeacherPresentButton() {
   const existingAttendance = hasSession ? (sessionDoc.data().attendance || {}) : {};
   const hasStudentRecords = hasSession && Object.keys(existingAttendance).length > 0;
   
+  markTeacherPresentToggle.style.display = 'inline-flex';
+  
   if (hasSession && !hasStudentRecords) {
-    // 有 session 但沒有學生記錄，顯示「取消標記」
-    markTeacherPresentBtn.textContent = '✗ 取消標記老師出席';
-    markTeacherPresentBtn.style.display = 'inline-block';
+    // 有 session 但沒有學生記錄，可以切換
+    markTeacherPresentToggle.checked = true;
+    markTeacherPresentToggle.disabled = false;
   } else if (hasSession && hasStudentRecords) {
-    // 有 session 且有學生記錄，顯示「已標記」（不可取消）
-    markTeacherPresentBtn.textContent = '✓ 已標記（有學生記錄）';
-    markTeacherPresentBtn.disabled = true;
-    markTeacherPresentBtn.style.display = 'inline-block';
+    // 有 session 且有學生記錄，已標記且不可取消
+    markTeacherPresentToggle.checked = true;
+    markTeacherPresentToggle.disabled = true;
   } else {
-    // 沒有 session，顯示「標記」
-    markTeacherPresentBtn.textContent = '✓ 標記老師出席';
-    markTeacherPresentBtn.disabled = false;
-    markTeacherPresentBtn.style.display = 'inline-block';
+    // 沒有 session，未標記
+    markTeacherPresentToggle.checked = false;
+    markTeacherPresentToggle.disabled = false;
   }
 }
 

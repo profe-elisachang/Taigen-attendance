@@ -3,10 +3,14 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { 
   getFirestore, 
   collection, 
+  doc,
+  getDoc,
+  setDoc,
   getDocs, 
   query, 
   where,
-  orderBy
+  orderBy,
+  serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { firebaseConfig } from './config.js';
 
@@ -47,11 +51,14 @@ const companyInfo = {
 // 狀態
 let allClasses = [];
 let allSessions = [];
+let currentNotes = ''; // 當前月份的備註
+let notesSaveTimeout = null; // 自動儲存延遲計時器
 
 // 初始化
 async function init() {
   await loadClasses();
   await loadSessions();
+  await loadNotes(); // 載入備註
   renderPayment();
   
   // 監聽事件
@@ -111,9 +118,67 @@ async function loadSessions() {
   }
 }
 
+// 載入備註
+async function loadNotes() {
+  try {
+    const selectedMonth = monthSelectPayment.value;
+    if (!selectedMonth) {
+      currentNotes = '';
+      return;
+    }
+    
+    const notesRef = doc(db, 'payment_notes', selectedMonth);
+    const notesDoc = await getDoc(notesRef);
+    
+    if (notesDoc.exists()) {
+      currentNotes = notesDoc.data().notes || '';
+    } else {
+      currentNotes = '';
+    }
+  } catch (error) {
+    console.error('Failed to load notes:', error);
+    currentNotes = '';
+  }
+}
+
+// 儲存備註（自動儲存，延遲執行）
+async function saveNotes(notes) {
+  try {
+    const selectedMonth = monthSelectPayment.value;
+    if (!selectedMonth) return;
+    
+    const notesRef = doc(db, 'payment_notes', selectedMonth);
+    await setDoc(notesRef, {
+      month: selectedMonth,
+      notes: notes,
+      updated_at: serverTimestamp()
+    }, { merge: true });
+    
+    console.log('Notes saved successfully');
+  } catch (error) {
+    console.error('Failed to save notes:', error);
+  }
+}
+
+// 處理備註輸入（自動儲存，延遲 1 秒）
+function handleNotesInput(notes) {
+  currentNotes = notes;
+  
+  // 清除之前的計時器
+  if (notesSaveTimeout) {
+    clearTimeout(notesSaveTimeout);
+  }
+  
+  // 延遲 1 秒後儲存
+  notesSaveTimeout = setTimeout(() => {
+    saveNotes(notes);
+  }, 1000);
+}
+
 // 處理月份變更
 async function handleMonthChange() {
   await loadSessions();
+  await loadNotes(); // 載入新月份的備註
   renderPayment();
 }
 
@@ -276,6 +341,20 @@ function renderPayment() {
     </div>
   `;
   
+  // 備註區塊
+  html += `
+    <div class="payment-notes-section">
+      <h3 class="notes-title">Notes</h3>
+      <textarea 
+        id="payment-notes-input" 
+        class="notes-input" 
+        placeholder="Enter notes here (auto-saved)..."
+        rows="4"
+      >${currentNotes}</textarea>
+      <div class="notes-hint">Notes are automatically saved after 1 second of inactivity</div>
+    </div>
+  `;
+  
   paymentContent.innerHTML = html;
   
   // 綁定請款日期輸入欄位
@@ -284,6 +363,14 @@ function renderPayment() {
     invoiceDateInput.addEventListener('change', () => {
       // 更新顯示的日期（如果需要即時更新）
       // 列印時會使用這個值
+    });
+  }
+  
+  // 綁定備註輸入欄位
+  const notesInput = document.getElementById('payment-notes-input');
+  if (notesInput) {
+    notesInput.addEventListener('input', (e) => {
+      handleNotesInput(e.target.value);
     });
   }
 }

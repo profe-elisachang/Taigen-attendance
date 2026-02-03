@@ -4,9 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>老師後台點名系統</title>
+  <link rel="stylesheet" href="css/navbar.css">
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
+  <!-- 導航列 -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">📚 Taigen 出勤系統</a>
+      <div class="nav-links">
+        <a href="daily-attendance.html" class="nav-link active">每日點名</a>
+        <a href="viewer.html" class="nav-link">出勤總覽</a>
+        <a href="payment.html" class="nav-link">請款系統</a>
+        <a href="viewer-rh.html" class="nav-link">HR 報告</a>
+      </div>
+    </div>
+  </nav>
+
   <div class="admin-container">
     <!-- 頂部控制區 -->
     <header class="admin-header">
@@ -90,12 +104,13 @@
       </div>
     </div>
 
-    <!-- 老師出席按鈕 -->
+    <!-- 老師出席 Toggle Switch -->
     <div class="teacher-present-section">
-      <button id="mark-teacher-present-btn" class="mark-teacher-present-btn" title="標記老師出席（即使沒有記錄學生出缺席）">
-        <span class="check-icon">✓</span>
-        <span class="btn-text">標記老師出席</span>
-      </button>
+      <label class="toggle-switch" for="mark-teacher-present-toggle" title="標記老師出席（即使沒有記錄學生出缺席）">
+        <input type="checkbox" id="mark-teacher-present-toggle" class="toggle-input">
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">標記老師出席</span>
+      </label>
     </div>
 
     <!-- 學生列表區 -->

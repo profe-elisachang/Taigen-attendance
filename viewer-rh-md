@@ -1,0 +1,68 @@
+請在目前的網站專案中，新增一個獨立的 viewer-rh.html。這個頁面是專門給 HR 看的『唯讀績效報告』：
+
+整合內容：
+
+頂部：新增一個 English Executive Summary。請根據資料自動計算各班級的 Engagement Rate (✔+i) / Total。
+
+中間：根據積極度指標，自動分類並列出 Top Performers 與 Under Observation 的學員名單。
+
+底部：嵌入原本 viewer.html 的詳細出勤表格，但必須設為『唯讀』，移除所有編輯功能與導覽列。
+
+功能按鈕：
+
+請加上一個 『Download PDF Report』 按鈕。點擊後，會將這份摘要報告與詳細表格排版成一份 Letter PDF。
+
+保留現有的 『Export Excel』 按鈕作為備用原始數據。
+
+安全分離：
+
+確保這個頁面不包含任何可以寫入 GitHub API 的 Token 或修改資料的邏輯。
+
+這是一個獨立的頁面，不需要 Nav Bar。
+
+
+
+
+ Logic & Metrics (The Brain)
+Attendance Rate: (Total 1s) / (Total Hours 老師的出席時數).
+Engagement Rate (Key Metric): (Total 1s + Total is) / (Total Hours老師的出席時數).
+
+Status Scripts:
+
+Class Status:
+
+Engagement ≥ 90%: "Excellent participation."
+
+60% - 89%: "Stable attendance; curriculum on track."
+
+< 60%: "Requires attention/HR intervention."
+
+Student Insights:
+
+If Attendance < 50% AND Engagement > 80%: "High commitment despite workload constraints."
+
+If Attendance < 50% AND Engagement < 50%: "Unexcused absences observed. Suggest resource review."
+
+4. Professional Output: Monthly Executive Summary (Letter PDF)
+Create a separate professional view (Print-friendly) containing:
+
+Header: Elisa Chang | Monthly Executive Summary | [Month/Year].
+
+Overall Snapshot:
+
+Total Hours | Total Fee ($400/hr) | Overall Avg. Engagement.
+
+Class Summaries: A grid showing each class's Attendance vs. Engagement with the auto-generated Status.
+
+Student Alerts:
+
+Top Performers: List students with 100% Engagement.
+
+Observation List: List students with Engagement < 50% (highlighted in red).
+
+Attachment: Include the detailed "Grid Table" (the one from my Excel) as an appendix.
+
+5. Technical Requirements
+Visual Style: Clean, professional, using dark blue (#1a365d) as the primary theme.
+
+PDF Generation: Use jsPDF or html2pdf.js to ensure the summary fits perfectly on one Letter page.

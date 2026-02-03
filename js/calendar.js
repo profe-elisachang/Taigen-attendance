@@ -751,6 +751,7 @@ async function handleDateHeaderClick(e) {
             class_id: currentClassId,
             paid_hours: 1,
             attendance: {},
+            cancelled: false,
             updated_at: serverTimestamp()
           };
           console.log('updateData:', updateData);
@@ -770,6 +771,7 @@ async function handleDateHeaderClick(e) {
           class_id: currentClassId,
           paid_hours: 1,
           attendance: {}, // 空的 attendance
+          cancelled: false,
           updated_at: serverTimestamp()
         };
         console.log('newData:', newData);

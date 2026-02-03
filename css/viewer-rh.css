@@ -1,0 +1,609 @@
+/* viewer-rh.css - HR Performance Report Styles */
+/* Primary Theme: Dark Blue (#1a365d) */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f5f5;
+  color: #2c3e50;
+  line-height: 1.6;
+}
+
+.viewer-rh-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #fff;
+  min-height: 100vh;
+}
+
+/* Header */
+.viewer-rh-header {
+  background: #1a365d;
+  color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.viewer-rh-header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #fff;
+}
+
+.header-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  font-size: 0.9rem;
+}
+
+.month-input {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.95);
+  color: #2c3e50;
+  min-width: 180px;
+  transition: border-color 0.2s;
+}
+
+.month-input:focus {
+  outline: none;
+  border-color: #fff;
+  background: #fff;
+}
+
+.export-btn {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.export-btn:hover {
+  background: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.header-subtitle {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
+}
+
+/* Main Content */
+.viewer-rh-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Executive Summary Section */
+.executive-summary {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.summary-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a365d;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #1a365d;
+}
+
+/* Overall Snapshot */
+.overall-snapshot {
+  background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+  color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.overall-snapshot h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+
+.snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.snapshot-item {
+  background: rgba(255,255,255,0.1);
+  padding: 1.5rem;
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
+}
+
+.snapshot-label {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 0.5rem;
+}
+
+.snapshot-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Class Summaries */
+.class-summaries {
+  margin-top: 2rem;
+}
+
+.class-summaries h3 {
+  font-size: 1.3rem;
+  color: #1a365d;
+  margin-bottom: 1.5rem;
+}
+
+.class-summaries-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.class-summary-card {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.2s;
+}
+
+.class-summary-card:hover {
+  border-color: #1a365d;
+  box-shadow: 0 4px 8px rgba(26,54,93,0.1);
+}
+
+.class-summary-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a365d;
+  margin-bottom: 1rem;
+}
+
+.class-summary-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.class-metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.class-metric-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.class-metric-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a365d;
+}
+
+.class-summary-status {
+  padding: 0.75rem;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #555;
+  border-left: 4px solid #3498db;
+}
+
+.class-summary-status.excellent {
+  border-left-color: #27ae60;
+  background: #e8f8f5;
+}
+
+.class-summary-status.stable {
+  border-left-color: #3498db;
+  background: #ebf5fb;
+}
+
+.class-summary-status.attention {
+  border-left-color: #e74c3c;
+  background: #fdeaea;
+}
+
+/* Student Insights */
+.student-insights {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.student-insights h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a365d;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #1a365d;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.insight-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.insight-section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a365d;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.insight-section-title.top-performers {
+  color: #27ae60;
+}
+
+.insight-section-title.under-observation {
+  color: #e74c3c;
+}
+
+.student-list {
+  list-style: none;
+}
+
+.student-item {
+  padding: 1rem;
+  background: #fff;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #3498db;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.student-item.top-performer {
+  border-left-color: #27ae60;
+  background: #e8f8f5;
+}
+
+.student-item.under-observation {
+  border-left-color: #e74c3c;
+  background: #fdeaea;
+}
+
+.student-info {
+  flex: 1;
+}
+
+.student-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.3rem;
+}
+
+.student-class {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.student-metrics {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.student-metric {
+  text-align: right;
+}
+
+.student-metric-label {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 0.2rem;
+}
+
+.student-metric-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a365d;
+}
+
+.student-status {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
+/* Detailed Tables Section */
+.detailed-tables {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.detailed-tables h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a365d;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #1a365d;
+}
+
+/* Reuse viewer.css styles for tables */
+.class-table-section {
+  margin-bottom: 3rem;
+}
+
+.class-table-section:last-child {
+  margin-bottom: 0;
+}
+
+.class-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.class-table-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1a365d;
+  margin: 0;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  table-layout: fixed;
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 0.5rem 0.4rem;
+  text-align: center;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+}
+
+.attendance-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.attendance-table .header-row-date th {
+  background: #e8f4f8;
+  border-bottom: 2px solid #3498db;
+  padding: 0.4rem 0.3rem;
+}
+
+.attendance-table .header-row-weekday th {
+  background: #f8f9fa;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.3rem;
+  color: #666;
+  border-top: 1px solid #ddd;
+}
+
+.attendance-table th.non-month-day,
+.attendance-table td.non-month-day {
+  background: #f5f5f5;
+  color: #bbb;
+  border-color: #e8e8e8;
+}
+
+.attendance-table th.non-class-day,
+.attendance-table td.non-class-day {
+  background: #fafafa;
+  color: #999;
+  border-color: #e8e8e8;
+}
+
+.attendance-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.attendance-table .student-name {
+  text-align: left;
+  font-weight: 600;
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.3;
+  padding: 0.5rem 0.3rem;
+}
+
+.status-present {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.status-absent {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.status-leave {
+  color: #f39c12;
+  font-weight: 600;
+}
+
+.week-total,
+.month-total {
+  background: #f8f9fa;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+.month-total {
+  background: #e8f4f8;
+}
+
+.attendance-table.hide-week-total th.week-total,
+.attendance-table.hide-week-total td.week-total {
+  display: none;
+}
+
+/* Loading and Empty States */
+.loading,
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.empty-state {
+  color: #999;
+}
+
+/* Print Styles */
+@media print {
+  .viewer-rh-container {
+    padding: 0;
+    background: #fff;
+  }
+
+  .viewer-rh-header {
+    background: #1a365d;
+    color: #fff;
+    page-break-after: avoid;
+  }
+
+  .header-controls {
+    display: none;
+  }
+
+  .executive-summary,
+  .student-insights,
+  .detailed-tables {
+    page-break-inside: avoid;
+    box-shadow: none;
+  }
+
+  .class-table-section {
+    page-break-inside: auto;
+  }
+
+  .attendance-table {
+    page-break-inside: auto;
+  }
+
+  .attendance-table tr {
+    page-break-inside: avoid;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .viewer-rh-container {
+    padding: 1rem;
+  }
+
+  .viewer-rh-header {
+    padding: 1.5rem;
+  }
+
+  .header-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-controls {
+    flex-direction: column;
+  }
+
+  .executive-summary,
+  .student-insights,
+  .detailed-tables {
+    padding: 1.5rem;
+  }
+
+  .snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .class-summaries-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

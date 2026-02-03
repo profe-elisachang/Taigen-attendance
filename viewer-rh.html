@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Language" content="en-US">
+  <title>HR Performance Report - Taigen Attendance</title>
+  <link rel="stylesheet" href="css/viewer-rh.css">
+</head>
+<body>
+  <div class="viewer-rh-container">
+    <header class="viewer-rh-header">
+      <div class="header-top">
+        <h1>Monthly Executive Summary</h1>
+        <div class="header-controls">
+          <div class="control-group">
+            <label for="month-select-rh">Month</label>
+            <input type="month" id="month-select-rh" class="month-input" lang="en-US">
+          </div>
+          <button id="export-excel-btn-rh" class="export-btn">Export Excel</button>
+        </div>
+      </div>
+      <div class="header-subtitle" id="header-subtitle">Elisa Chang | Monthly Executive Summary | <span id="month-year-display"></span></div>
+    </header>
+
+    <main class="viewer-rh-content">
+      <!-- Executive Summary Section -->
+      <section class="executive-summary" id="executive-summary">
+        <div class="loading">Loading...</div>
+      </section>
+
+      <!-- Student Insights Section -->
+      <section class="student-insights" id="student-insights">
+        <!-- Will be populated by JavaScript -->
+      </section>
+
+      <!-- Detailed Attendance Tables Section -->
+      <section class="detailed-tables" id="detailed-tables">
+        <div class="loading">Loading...</div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="js/viewer-rh.js"></script>
+</body>
+</html>
+

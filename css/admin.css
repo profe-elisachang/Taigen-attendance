@@ -289,8 +289,8 @@
   background-color: #fff;
   border-radius: 8px;
   width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
+  max-width: 900px;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   animation: slideDown 0.3s;
@@ -505,70 +505,74 @@
   justify-content: flex-start;
 }
 
-.mark-teacher-present-btn {
+/* Toggle Switch 樣式 */
+.toggle-switch {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+  gap: 1rem;
   cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
-  position: relative;
-  overflow: hidden;
+  user-select: none;
 }
 
-.mark-teacher-present-btn::before {
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 60px;
+  height: 32px;
+  background-color: #ccc;
+  border-radius: 34px;
+  transition: background-color 0.3s;
+}
+
+.toggle-slider::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.mark-teacher-present-btn:hover::before {
-  left: 100%;
-}
-
-.mark-teacher-present-btn:hover {
-  background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-}
-
-.mark-teacher-present-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
-}
-
-.mark-teacher-present-btn .check-icon {
-  font-size: 1.3rem;
-  font-weight: bold;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  background: rgba(255, 255, 255, 0.2);
+  height: 26px;
+  width: 26px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
   border-radius: 50%;
-  transition: all 0.3s;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.mark-teacher-present-btn:hover .check-icon {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1) rotate(360deg);
+.toggle-input:checked + .toggle-slider {
+  background-color: #27ae60;
 }
 
-.mark-teacher-present-btn .btn-text {
-  letter-spacing: 0.5px;
+.toggle-input:checked + .toggle-slider::before {
+  transform: translateX(28px);
+}
+
+.toggle-input:disabled + .toggle-slider {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toggle-input:focus + .toggle-slider {
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+}
+
+.toggle-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  transition: color 0.3s;
+}
+
+.toggle-input:checked ~ .toggle-label {
+  color: #27ae60;
+}
+
+.toggle-input:disabled ~ .toggle-label {
+  color: #999;
 }
 
 /* 學生區域標題 */
