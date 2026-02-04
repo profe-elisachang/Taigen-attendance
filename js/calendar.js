@@ -356,16 +356,14 @@ function renderCalendar() {
     let className = 'date-header';
     if (isWeekend) className += ' weekend';
     if (isToday) className += ' today';
-    // 預定上課日或有實際 session 時都顯示為「老師出席」（綠色標記）
-    // 但如果 session 已取消（paid_hours: 0 或 cancelled: true），則不顯示綠色
+    // 只有當實際有 session 且未取消時才顯示為「老師出席」（綠色標記）
+    // 預定上課日只是視覺提示，不影響顏色顯示
     if (!isWeekend) {
       if (hasSession && !isCancelled) {
         // 有 session 且未取消，顯示綠色
         className += ' teacher-present';
-      } else if (!hasSession && isScheduledDay) {
-        // 預定上課日且沒有 session，顯示綠色
-        className += ' teacher-present';
       }
+      // 注意：預定上課日但沒有 session 時，不顯示綠色（因為實際上沒有 session）
     }
     
     // 設定 title 提示文字
@@ -377,7 +375,7 @@ function renderCalendar() {
     } else if (hasSession && isCancelled) {
       titleText = '已取消，點擊恢復標記';
     } else if (isScheduledDay) {
-      titleText = '預定上課日，點擊取消標記（國定假日等）';
+      titleText = '預定上課日，點擊標記老師出席';
     } else {
       titleText = '點擊標記老師出席';
     }
@@ -506,6 +504,8 @@ function handleCellClick(e) {
   const studentId = cell.dataset.student;
   const currentStatus = cell.dataset.status || '';
   
+  console.log('handleCellClick:', { dateKey, studentId, currentStatus });
+  
   // 循環切換：空白 → v → x → i → 空白
   let newStatus = '';
   if (currentStatus === '') {
@@ -518,6 +518,8 @@ function handleCellClick(e) {
     newStatus = ''; // 空白
   }
   
+  console.log('newStatus:', newStatus);
+  
   // 更新本地狀態
   if (!currentSessions[dateKey]) {
     currentSessions[dateKey] = {
@@ -529,19 +531,19 @@ function handleCellClick(e) {
   
   if (newStatus === '') {
     delete currentSessions[dateKey].attendance[studentId];
+    console.log('清除學生記錄，剩餘 attendance keys:', Object.keys(currentSessions[dateKey].attendance));
     if (Object.keys(currentSessions[dateKey].attendance).length === 0) {
-      // 如果沒有學生記錄，檢查是否為預定上課日
-      const isScheduledDay = classDays.includes(adjustedDayOfWeek);
-      if (!isScheduledDay) {
-        // 不是預定上課日且沒有學生記錄，可以刪除
-        delete currentSessions[dateKey];
-      }
+      // 如果沒有學生記錄，直接刪除 session（無論是否為預定上課日）
+      // 預定上課日只是視覺提示，實際 session 由老師操作決定
+      console.log('所有學生記錄已清除，刪除 session');
+      delete currentSessions[dateKey];
     }
   } else {
     currentSessions[dateKey].attendance[studentId] = newStatus;
     // 如果有學生記錄，確保 paid_hours 為 1 且未取消
     currentSessions[dateKey].paid_hours = 1;
     currentSessions[dateKey].cancelled = false;
+    console.log('更新學生記錄，attendance keys:', Object.keys(currentSessions[dateKey].attendance));
   }
   
   // 更新顯示
@@ -623,78 +625,83 @@ async function handleDateHeaderClick(e) {
       console.log('attendance length:', Object.keys(attendance).length);
       
       if (Object.keys(attendance).length === 0) {
-        // 如果 attendance 是空的，可以刪除或標記為已取消
+        // 如果 attendance 是空的，直接刪除 session（無論是否為預定上課日）
         const sessionId = `${dateKey}_${currentClassId}`;
         const sessionRef = doc(db, 'sessions', sessionId);
         
-        if (isScheduled) {
-          // 如果是預定上課日，標記為已取消（paid_hours: 0）而不是刪除
-          console.log('預定上課日，標記為已取消');
-          const dateTimestamp = new Date(dateKey + 'T00:00:00');
-          await setDoc(sessionRef, {
-            date: dateTimestamp,
-            class_id: currentClassId,
-            paid_hours: 0,
-            attendance: {},
-            cancelled: true,
-            updated_at: serverTimestamp()
-          }, { merge: true });
-          
-          currentSessions[dateKey] = {
-            attendance: {},
-            paid_hours: 0,
-            cancelled: true
-          };
-          showMessage('✓ 已取消預定上課日標記', 'success');
-        } else {
-          // 如果不是預定上課日，直接刪除 session
-          console.log('準備刪除 session:', sessionId);
-          await deleteDoc(sessionRef);
-          console.log('✓ 刪除成功');
-          
-          delete currentSessions[dateKey];
-          showMessage('✓ 已取消標記', 'success');
+        console.log('準備刪除 session:', sessionId);
+        await deleteDoc(sessionRef);
+        console.log('✓ 刪除成功');
+        
+        // 驗證刪除是否成功
+        const verifyDoc = await getDoc(sessionRef);
+        if (verifyDoc.exists()) {
+          console.error('✗ 刪除後驗證失敗：session 仍然存在於 Firestore');
+          throw new Error('刪除後驗證失敗：session 仍然存在於 Firestore');
         }
+        console.log('✓ 驗證成功，session 已從 Firestore 刪除');
+        
+        delete currentSessions[dateKey];
+        showMessage('✓ 已取消標記', 'success');
+        
+        // 重新載入 sessions 以確保同步
+        console.log('重新載入 sessions...');
+        await loadSessions();
+        console.log('重新載入完成，currentSessions:', currentSessions);
+        
+        // 重新渲染以更新視覺標記
+        console.log('重新渲染月曆...');
+        try {
+          renderCalendar();
+          console.log('✓ 月曆渲染完成');
+        } catch (renderError) {
+          console.error('渲染月曆失敗:', renderError);
+          showMessage('✗ 渲染失敗，請重新整理頁面', 'error');
+        }
+        console.log('=== 處理完成 ===');
+        return; // 提前返回，避免執行後續邏輯
       } else {
-        // 如果有學生記錄，不能刪除 session
-        console.log('此日期已有學生出缺席記錄，無法取消標記');
-        alert('此日期已有學生出缺席記錄，無法取消標記');
-        return;
+        // 如果有學生記錄，詢問用戶是否要刪除整個 session（包括所有學生記錄）
+        if (!confirm(`此日期已有 ${Object.keys(attendance).length} 個學生的出缺席記錄。\n確定要刪除整個 session 嗎？\n（這會刪除所有學生的記錄）`)) {
+          return;
+        }
+        
+        // 用戶確認後，直接刪除 session
+        const sessionId = `${dateKey}_${currentClassId}`;
+        const sessionRef = doc(db, 'sessions', sessionId);
+        
+        console.log('準備刪除 session（包含學生記錄）:', sessionId);
+        await deleteDoc(sessionRef);
+        console.log('✓ 刪除成功');
+        
+        // 驗證刪除是否成功
+        const verifyDoc = await getDoc(sessionRef);
+        if (verifyDoc.exists()) {
+          console.error('✗ 刪除後驗證失敗：session 仍然存在於 Firestore');
+          throw new Error('刪除後驗證失敗：session 仍然存在於 Firestore');
+        }
+        console.log('✓ 驗證成功，session 已從 Firestore 刪除');
+        
+        delete currentSessions[dateKey];
+        showMessage('✓ 已刪除 session（包含所有學生記錄）', 'success');
+        
+        // 重新載入 sessions 以確保同步
+        console.log('重新載入 sessions...');
+        await loadSessions();
+        console.log('重新載入完成，currentSessions:', currentSessions);
+        
+        // 重新渲染以更新視覺標記
+        console.log('重新渲染月曆...');
+        try {
+          renderCalendar();
+          console.log('✓ 月曆渲染完成');
+        } catch (renderError) {
+          console.error('渲染月曆失敗:', renderError);
+          showMessage('✗ 渲染失敗，請重新整理頁面', 'error');
+        }
+        console.log('=== 處理完成 ===');
+        return; // 提前返回，避免執行後續邏輯
       }
-    } else if (isScheduled) {
-      // 沒有 session 但是預定上課日：取消預定標記（創建一個 paid_hours: 0 的 session 來記錄「已取消」）
-      if (!confirm(`確定要取消 ${dateKey} 這天的預定上課日標記嗎？\n（例如：國定假日、公司通知休假等）`)) {
-        return;
-      }
-      
-      const sessionId = `${dateKey}_${currentClassId}`;
-      const sessionRef = doc(db, 'sessions', sessionId);
-      const dateTimestamp = new Date(dateKey + 'T00:00:00');
-      
-      console.log('取消預定上課日標記 - 準備創建 paid_hours: 0 的 session');
-      console.log('sessionId:', sessionId);
-      console.log('dateTimestamp:', dateTimestamp);
-      
-      // 創建一個 paid_hours: 0 的 session 來記錄「已取消的預定上課日」
-      await setDoc(sessionRef, {
-        date: dateTimestamp,
-        class_id: currentClassId,
-        paid_hours: 0,  // 0 表示已取消，不計入請款
-        attendance: {},
-        cancelled: true,  // 標記為已取消
-        updated_at: serverTimestamp()
-      });
-      
-      console.log('✓ 已創建取消標記的 session');
-      
-      // 更新本地狀態（標記為已取消，但 hasSession 會是 true，所以不會顯示綠色）
-      currentSessions[dateKey] = {
-        attendance: {},
-        paid_hours: 0,
-        cancelled: true
-      };
-      
-      showMessage('✓ 已取消預定上課日標記', 'success');
     } else if (hasSession && isCancelled) {
       // 有 session 但已取消：恢復標記
       if (!confirm(`確定要恢復 ${dateKey} 這天的標記嗎？`)) {
@@ -851,7 +858,37 @@ async function handleSave() {
     saveCalendarBtn.disabled = true;
     saveCalendarBtn.textContent = '儲存中...';
     
-    // 遍歷所有有記錄的日期
+    // 先載入當前月份的所有 sessions（從 Firestore），用於比對需要刪除的 session
+    const [year, month] = currentMonthValue.split('-');
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+    
+    const sessionsRef = collection(db, 'sessions');
+    const q = query(
+      sessionsRef,
+      where('date', '>=', startDate),
+      where('date', '<=', endDate)
+    );
+    
+    const snapshot = await getDocs(q);
+    const firestoreSessions = new Map(); // 儲存 Firestore 中當前班級的所有 session {dateKey: sessionId}
+    
+    snapshot.forEach(doc => {
+      const sessionData = doc.data();
+      if (sessionData.class_id === currentClassId) {
+        const date = sessionData.date.toDate();
+        const dateKey = date.toISOString().split('T')[0];
+        // 使用構建的 sessionId 格式，確保一致性
+        const sessionId = `${dateKey}_${currentClassId}`;
+        firestoreSessions.set(dateKey, sessionId);
+      }
+    });
+    
+    console.log('=== handleSave 開始 ===');
+    console.log('currentSessions keys:', Object.keys(currentSessions));
+    console.log('firestoreSessions keys:', Array.from(firestoreSessions.keys()));
+    
+    // 遍歷所有有記錄的日期（更新或創建）
     for (const [dateKey, sessionInfo] of Object.entries(currentSessions)) {
       const sessionId = `${dateKey}_${currentClassId}`;
       const sessionRef = doc(db, 'sessions', sessionId);
@@ -860,10 +897,47 @@ async function handleSave() {
       const dateTimestamp = new Date(dateKey + 'T00:00:00');
       
       // 如果 sessionInfo 是舊格式（直接是 attendance），轉換為新格式
-      const attendance = sessionInfo?.attendance || (typeof sessionInfo === 'object' && !sessionInfo.attendance ? sessionInfo : {});
+      // 確保正確提取 attendance 物件
+      let attendance = {};
+      if (sessionInfo?.attendance) {
+        attendance = sessionInfo.attendance;
+      } else if (typeof sessionInfo === 'object' && sessionInfo !== null) {
+        // 檢查是否為舊格式（直接是 attendance 物件）
+        const hasAttendanceKey = 'attendance' in sessionInfo;
+        if (!hasAttendanceKey && !sessionInfo.paid_hours && !sessionInfo.cancelled) {
+          // 可能是舊格式，整個 sessionInfo 就是 attendance
+          attendance = sessionInfo;
+        }
+      }
+      
       const paid_hours = sessionInfo?.paid_hours || 1;
       const cancelled = sessionInfo?.cancelled || false;
       
+      const attendanceKeys = Object.keys(attendance);
+      console.log(`處理 ${dateKey}:`, { 
+        attendance, 
+        paid_hours, 
+        cancelled, 
+        attendanceKeys: attendanceKeys,
+        attendanceCount: attendanceKeys.length,
+        sessionInfo: sessionInfo,
+        sessionInfoKeys: Object.keys(sessionInfo || {})
+      });
+      
+      // 如果 attendance 為空且未取消，直接刪除 session（無論是否為預定上課日）
+      // 預定上課日只是視覺提示，實際 session 由老師操作決定
+      if (attendanceKeys.length === 0 && !cancelled) {
+        try {
+          await deleteDoc(sessionRef);
+          console.log(`✓ 已刪除 session: ${dateKey} (attendance 為空)`);
+          firestoreSessions.delete(dateKey); // 從列表中移除，避免後續重複處理
+        } catch (error) {
+          console.error(`✗ 刪除 session ${dateKey} 失敗:`, error);
+        }
+        continue; // 跳過寫入
+      }
+      
+      // 寫入或更新 session
       await setDoc(sessionRef, {
         date: dateTimestamp,
         class_id: currentClassId,
@@ -872,12 +946,39 @@ async function handleSave() {
         cancelled: cancelled,
         updated_at: serverTimestamp()
       }, { merge: true });
+      
+      console.log(`✓ 已更新 session: ${dateKey}`);
+      
+      // 標記此 session 已處理
+      firestoreSessions.delete(dateKey);
     }
+    
+    // 檢查 Firestore 中存在但 currentSessions 中不存在的 sessions（需要刪除）
+    // 直接刪除，無論是否為預定上課日（預定上課日只是視覺提示）
+    const sessionsToDelete = Array.from(firestoreSessions.keys());
+    console.log(`需要刪除的 sessions (在 Firestore 中但不在 currentSessions 中):`, sessionsToDelete);
+    
+    for (const [dateKey, sessionId] of firestoreSessions.entries()) {
+      // 這個 session 在 Firestore 中存在，但在 currentSessions 中不存在，直接刪除
+      const sessionRef = doc(db, 'sessions', sessionId);
+      try {
+        await deleteDoc(sessionRef);
+        console.log(`✓ 已刪除 Firestore 中的 session: ${dateKey} (不在 currentSessions 中)`);
+      } catch (error) {
+        console.error(`✗ 刪除 Firestore session ${dateKey} 失敗:`, error);
+      }
+    }
+    
+    console.log('=== handleSave 完成 ===');
     
     pendingChanges = false;
     saveCalendarBtn.disabled = true;
     saveCalendarBtn.textContent = '儲存變更';
     unsavedWarning.style.display = 'none';
+    
+    // 重新載入 sessions 以確保同步
+    await loadSessions();
+    renderCalendar();
     
     // 顯示成功訊息
     showMessage('✓ 已儲存', 'success');

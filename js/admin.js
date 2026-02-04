@@ -45,6 +45,7 @@ const markTeacherPresentToggle = document.getElementById('mark-teacher-present-t
 // 狀態
 let currentDate = new Date().toISOString().split('T')[0];
 let currentClassId = null;
+let currentClassData = null; // 儲存當前班級的完整資料（包含 class_days）
 let currentStudents = [];
 let currentAttendance = {};
 let pendingChanges = false;
@@ -153,8 +154,28 @@ async function handleClassChange(e) {
   if (!currentClassId) {
     studentList.innerHTML = '';
     studentSectionHeader.style.display = 'none';
+    currentClassData = null;
     updateProgress();
     return;
+  }
+  
+  // 載入當前班級的完整資料（包含 class_days）
+  try {
+    const classRef = doc(db, 'classes', currentClassId);
+    const classDoc = await getDoc(classRef);
+    if (classDoc.exists()) {
+      const data = classDoc.data();
+      currentClassData = {
+        id: currentClassId,
+        name: data.name,
+        class_days: data.class_days || [1, 2, 3, 4, 5]
+      };
+    } else {
+      currentClassData = { id: currentClassId, name: '', class_days: [1, 2, 3, 4, 5] };
+    }
+  } catch (error) {
+    console.error('載入班級資料失敗:', error);
+    currentClassData = { id: currentClassId, name: '', class_days: [1, 2, 3, 4, 5] };
   }
   
   // 顯示學生區域標題
@@ -318,11 +339,45 @@ async function handleSave() {
     // 轉換日期字串為 timestamp
     const dateTimestamp = new Date(currentDate + 'T00:00:00');
     
+    // 檢查 attendance 是否為空
+    const hasAttendance = Object.keys(currentAttendance).length > 0;
+    
+    if (!hasAttendance) {
+      // 如果 attendance 為空，直接刪除 session（無論是否為預定上課日）
+      // 預定上課日只是視覺提示，實際 session 由老師操作決定
+      try {
+        const sessionDoc = await getDoc(sessionRef);
+        if (sessionDoc.exists()) {
+          await deleteDoc(sessionRef);
+          console.log(`已刪除 session: ${currentDate}`);
+          showMessage('✓ 已清除記錄', 'success');
+        } else {
+          // session 不存在，無需操作
+          showMessage('✓ 已清除記錄', 'success');
+        }
+      } catch (error) {
+        console.error(`刪除 session ${currentDate} 失敗:`, error);
+        showMessage('✗ 清除記錄失敗，請重試', 'error');
+      }
+      
+      // 重新載入出缺席記錄
+      await loadAttendance();
+      renderStudents();
+      await updateMarkTeacherPresentButton();
+      
+      pendingChanges = false;
+      saveBtn.disabled = true;
+      saveBtn.textContent = '儲存變更';
+      return;
+    }
+    
+    // 有學生記錄或為預定上課日，寫入或更新 session
     await setDoc(sessionRef, {
       date: dateTimestamp,
       class_id: currentClassId,
       paid_hours: 1,  // 固定為 1 小時
       attendance: currentAttendance,
+      cancelled: false,  // 明確標記為未取消（因為有學生出缺席記錄）
       updated_at: serverTimestamp()
     }, { merge: true });
     
@@ -360,14 +415,19 @@ async function handleMarkTeacherPresent() {
   console.log('檢查是否已存在 session...');
   const sessionDoc = await getDoc(sessionRef);
   const hasSession = sessionDoc.exists();
-  const existingAttendance = hasSession ? (sessionDoc.data().attendance || {}) : {};
+  const sessionData = hasSession ? sessionDoc.data() : {};
+  const existingAttendance = sessionData.attendance || {};
   const hasStudentRecords = hasSession && Object.keys(existingAttendance).length > 0;
+  // 檢查是否已取消（與 calendar.js 邏輯一致）
+  const isCancelled = hasSession && (sessionData.cancelled || sessionData.paid_hours === 0);
   
   const isChecked = markTeacherPresentToggle.checked;
   
   console.log('hasSession:', hasSession);
+  console.log('sessionData:', sessionData);
   console.log('existingAttendance:', existingAttendance);
   console.log('hasStudentRecords:', hasStudentRecords);
+  console.log('isCancelled:', isCancelled);
   console.log('isChecked:', isChecked);
   
   if (isChecked) {
@@ -377,6 +437,42 @@ async function handleMarkTeacherPresent() {
       markTeacherPresentToggle.checked = true;
       markTeacherPresentToggle.disabled = true;
       return;
+    }
+    
+    // 如果 session 已取消，需要恢復它
+    if (hasSession && isCancelled) {
+      try {
+        markTeacherPresentToggle.disabled = true;
+        
+        const dateTimestamp = new Date(currentDate + 'T00:00:00');
+        console.log('恢復已取消的 session...');
+        
+        await setDoc(sessionRef, {
+          date: dateTimestamp,
+          class_id: currentClassId,
+          paid_hours: 1,
+          attendance: existingAttendance,
+          cancelled: false,
+          updated_at: serverTimestamp()
+        }, { merge: true });
+        
+        console.log('✓ 恢復成功');
+        markTeacherPresentToggle.disabled = false;
+        await updateMarkTeacherPresentButton();
+        showMessage('✓ 已恢復標記老師出席', 'success');
+        await loadAttendance();
+        renderStudents();
+        await updateMarkTeacherPresentButton();
+        return;
+      } catch (error) {
+        console.error('恢復失敗:', error);
+        const errorMsg = error.message || error.code || '未知錯誤';
+        showMessage(`✗ 恢復失敗: ${errorMsg}`, 'error');
+        markTeacherPresentToggle.checked = false;
+        markTeacherPresentToggle.disabled = false;
+        await updateMarkTeacherPresentButton();
+        return;
+      }
     }
     
     if (!hasSession) {
@@ -498,19 +594,26 @@ async function updateMarkTeacherPresentButton() {
   const sessionRef = doc(db, 'sessions', sessionId);
   const sessionDoc = await getDoc(sessionRef);
   const hasSession = sessionDoc.exists();
-  const existingAttendance = hasSession ? (sessionDoc.data().attendance || {}) : {};
+  const sessionData = hasSession ? sessionDoc.data() : {};
+  const existingAttendance = sessionData.attendance || {};
   const hasStudentRecords = hasSession && Object.keys(existingAttendance).length > 0;
+  // 檢查是否已取消（與 calendar.js 邏輯一致）
+  const isCancelled = hasSession && (sessionData.cancelled || sessionData.paid_hours === 0);
   
   markTeacherPresentToggle.style.display = 'inline-flex';
   
-  if (hasSession && !hasStudentRecords) {
-    // 有 session 但沒有學生記錄，可以切換
+  if (hasSession && !hasStudentRecords && !isCancelled) {
+    // 有 session 但沒有學生記錄且未取消，可以切換
     markTeacherPresentToggle.checked = true;
     markTeacherPresentToggle.disabled = false;
   } else if (hasSession && hasStudentRecords) {
     // 有 session 且有學生記錄，已標記且不可取消
     markTeacherPresentToggle.checked = true;
     markTeacherPresentToggle.disabled = true;
+  } else if (hasSession && isCancelled) {
+    // 有 session 但已取消，顯示為未標記
+    markTeacherPresentToggle.checked = false;
+    markTeacherPresentToggle.disabled = false;
   } else {
     // 沒有 session，未標記
     markTeacherPresentToggle.checked = false;
