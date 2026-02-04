@@ -44,7 +44,7 @@
   <script type="module">
     import { initAuth } from './js/auth.js';
     // 先進行認證檢查，通過後才載入主要功能
-    await initAuth('hr', 'HR 報告');
+    await initAuth('hr', 'Attendance Report');
     // 認證通過後載入主要功能
     import('./js/viewer-rh.js');
   </script>

@@ -96,14 +96,20 @@ export async function showPasswordPrompt(role, pageName) {
       text-align: center;
     `;
     
-    const title = role === 'hr' ? 'HR 專用頁面' : '老師後台';
+    const title = role === 'hr' ? 'Attendance Report' : '老師後台';
+    const promptText = role === 'hr' ? `Please enter password to access Monthly Report` : `請輸入密碼以訪問 ${pageName}`;
+    const placeholderText = role === 'hr' ? 'Enter password' : '輸入密碼';
+    const buttonText = role === 'hr' ? 'Confirm' : '確認';
+    const emptyPasswordError = role === 'hr' ? 'Please enter password' : '請輸入密碼';
+    const wrongPasswordError = role === 'hr' ? 'Incorrect password, please try again' : '密碼錯誤，請重試';
+    
     dialog.innerHTML = `
       <h2 style="margin-bottom: 20px; color: #333; font-size: 24px;">${title}</h2>
-      <p style="margin-bottom: 25px; color: #666; font-size: 16px;">請輸入密碼以訪問 ${pageName}</p>
+      <p style="margin-bottom: 25px; color: #666; font-size: 16px;">${promptText}</p>
       <input 
         type="password" 
         id="password-input" 
-        placeholder="輸入密碼"
+        placeholder="${placeholderText}"
         style="
           width: 100%;
           padding: 12px;
@@ -132,7 +138,7 @@ export async function showPasswordPrompt(role, pageName) {
         "
         onmouseover="this.style.background='#5568d3'"
         onmouseout="this.style.background='#667eea'"
-      >確認</button>
+      >${buttonText}</button>
     `;
     
     overlay.appendChild(dialog);
@@ -145,9 +151,11 @@ export async function showPasswordPrompt(role, pageName) {
     // 處理提交
     const handleSubmit = async () => {
       const password = passwordInput.value.trim();
+      const emptyPasswordError = role === 'hr' ? 'Please enter password' : '請輸入密碼';
+      const wrongPasswordError = role === 'hr' ? 'Incorrect password, please try again' : '密碼錯誤，請重試';
       
       if (!password) {
-        errorMsg.textContent = '請輸入密碼';
+        errorMsg.textContent = emptyPasswordError;
         passwordInput.focus();
         return;
       }
@@ -159,7 +167,7 @@ export async function showPasswordPrompt(role, pageName) {
         document.body.removeChild(overlay);
         resolve(true);
       } else {
-        errorMsg.textContent = '密碼錯誤，請重試';
+        errorMsg.textContent = wrongPasswordError;
         passwordInput.value = '';
         passwordInput.focus();
       }
