@@ -41,7 +41,13 @@
     </main>
   </div>
 
-  <script type="module" src="js/payment.js"></script>
+  <script type="module">
+    import { initAuth } from './js/auth.js';
+    // 先進行認證檢查，通過後才載入主要功能
+    await initAuth('teacher', '請款系統');
+    // 認證通過後載入主要功能
+    import('./js/payment.js');
+  </script>
 </body>
 </html>
 
