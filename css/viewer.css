@@ -87,6 +87,103 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   overflow-x: auto;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.viewer-section {
+  background: #fff;
+}
+
+/* Executive Summary（無 Total Fee） */
+.summary-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a365d;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #1a365d;
+}
+
+.overall-snapshot {
+  background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+  color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.overall-snapshot h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+
+.snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.snapshot-item {
+  background: rgba(255,255,255,0.1);
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+
+.snapshot-label {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 0.5rem;
+}
+
+.snapshot-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Student Insights：該班每人一行 */
+.student-list-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1a365d;
+  margin-bottom: 1rem;
+}
+
+.student-list-table {
+  width: 100%;
+  max-width: 500px;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.student-list-table th,
+.student-list-table td {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  border: 1px solid #e0e0e0;
+}
+
+.student-list-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.student-list-table .student-name-cell {
+  font-weight: 600;
+}
+
+/* 老師出席列 */
+.attendance-table tr.row-teacher {
+  background: #f0f9f4;
+  font-weight: 600;
+}
+
+.attendance-table .status-teacher {
+  color: #28a745;
+  font-weight: 600;
 }
 
 .loading {

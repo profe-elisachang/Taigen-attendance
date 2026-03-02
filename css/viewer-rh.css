@@ -84,6 +84,12 @@ body {
   background: #fff;
 }
 
+.month-hint {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.85);
+  font-style: italic;
+}
+
 .export-btn {
   padding: 0.75rem 2rem;
   font-size: 1rem;

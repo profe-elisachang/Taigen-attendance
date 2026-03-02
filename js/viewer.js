@@ -20,7 +20,9 @@ const db = getFirestore(app);
 const monthSelect = document.getElementById('month-select');
 const classSelectViewer = document.getElementById('class-select-viewer');
 const exportExcelBtn = document.getElementById('export-excel-btn');
-const viewerContent = document.getElementById('viewer-content');
+const executiveSummarySection = document.getElementById('executive-summary-section');
+const studentListSection = document.getElementById('student-list-section');
+const detailedTablesSection = document.getElementById('detailed-tables-section');
 
 // 設定預設月份為當前月份
 const now = new Date();
@@ -59,14 +61,17 @@ async function loadClasses() {
       });
     });
     
-    // 更新下拉選單
-    classSelectViewer.innerHTML = '<option value="all">All Classes</option>';
+    // 更新下拉選單（僅班級，無「全部」；學生畫面只顯示單班）
+    classSelectViewer.innerHTML = '';
     allClasses.forEach(cls => {
       const option = document.createElement('option');
       option.value = cls.id;
       option.textContent = cls.name;
       classSelectViewer.appendChild(option);
     });
+    if (allClasses.length > 0) {
+      classSelectViewer.value = allClasses[0].id;
+    }
   } catch (error) {
     console.error('Failed to load classes:', error);
   }
@@ -115,38 +120,138 @@ function handleClassChange() {
   renderTables();
 }
 
-// 渲染表格
+// 渲染整個畫面（單班：Executive Summary 無費用 + 學生列表 + 詳細出席表）
 async function renderTables() {
-  viewerContent.innerHTML = '<div class="loading">載入中...</div>';
-  
   const selectedClassId = classSelectViewer.value;
-  const classesToShow = selectedClassId === 'all' 
-    ? allClasses 
-    : allClasses.filter(c => c.id === selectedClassId);
   
-  if (classesToShow.length === 0) {
-    viewerContent.innerHTML = '<div class="empty-state">No classes available</div>';
+  if (!selectedClassId || allClasses.length === 0) {
+    executiveSummarySection.innerHTML = '<div class="empty-state">請選擇班級</div>';
+    studentListSection.innerHTML = '';
+    detailedTablesSection.innerHTML = '';
     return;
   }
   
-  let html = '';
-  
-  for (const classData of classesToShow) {
-    html += await renderClassTable(classData);
+  const classData = allClasses.find(c => c.id === selectedClassId);
+  if (!classData) {
+    executiveSummarySection.innerHTML = '<div class="empty-state">班級不存在</div>';
+    studentListSection.innerHTML = '';
+    detailedTablesSection.innerHTML = '';
+    return;
   }
   
-  viewerContent.innerHTML = html || '<div class="empty-state">No data available</div>';
+  executiveSummarySection.innerHTML = '<div class="loading">載入中...</div>';
+  studentListSection.innerHTML = '';
+  detailedTablesSection.innerHTML = '';
   
-  // 預設隱藏所有 Week Total 欄位
-  const tables = viewerContent.querySelectorAll('.attendance-table');
-  tables.forEach(table => {
-    table.classList.add('hide-week-total');
+  const classSessions = allSessions.filter(s => s.class_id === classData.id);
+  
+  if (classSessions.length === 0) {
+    executiveSummarySection.innerHTML = '<div class="empty-state">此月份尚無出勤記錄</div>';
+    studentListSection.innerHTML = '';
+    detailedTablesSection.innerHTML = '<div class="empty-state">此月份尚無出勤記錄</div>';
+    return;
+  }
+  
+  // 建立 sessionMap（僅 paid 且未取消）
+  const sessionMap = {};
+  classSessions.forEach(session => {
+    const paidHours = session.paid_hours !== undefined ? session.paid_hours : 1;
+    const isCancelled = session.cancelled || paidHours === 0;
+    if (!isCancelled) {
+      const date = session.date.toDate();
+      const dateKey = date.toISOString().split('T')[0];
+      sessionMap[dateKey] = session.attendance || {};
+    }
   });
+  
+  const scheduledDays = Object.keys(sessionMap).length;
+  const totalHours = scheduledDays; // 老師出席天數 = 該班當月 session 數
+  
+  // 載入該班學生並計算每人 Attendance %、Engagement %
+  const studentsRef = collection(db, `classes/${classData.id}/students`);
+  const studentsSnapshot = await getDocs(query(studentsRef, where('active', '==', true)));
+  const students = [];
+  studentsSnapshot.forEach(doc => {
+    students.push({
+      id: doc.id,
+      name: doc.data().name
+    });
+  });
+  students.sort((a, b) => a.name.localeCompare(b.name));
+  
+  const studentsWithRates = students.map(student => {
+    let totalPresent = 0, totalLeave = 0;
+    Object.keys(sessionMap).forEach(dateKey => {
+      const att = sessionMap[dateKey][student.id];
+      if (att === '1') totalPresent++;
+      else if (att === 'i') totalLeave++;
+    });
+    const attendanceRate = scheduledDays > 0 ? Math.round((totalPresent / scheduledDays) * 100) : 0;
+    const engagementRate = scheduledDays > 0 ? Math.round(((totalPresent + totalLeave) / scheduledDays) * 100) : 0;
+    return {
+      ...student,
+      attendanceRate,
+      engagementRate
+    };
+  });
+  
+  const avgEngagementByStudent = studentsWithRates.length > 0
+    ? Math.round(studentsWithRates.reduce((sum, s) => sum + s.engagementRate, 0) / studentsWithRates.length)
+    : 0;
+  const avgEngagementByClass = avgEngagementByStudent; // 單班時相同
+  
+  // 1. Executive Summary（無 Total Fee）
+  executiveSummarySection.innerHTML = `
+    <div class="summary-section-title">Executive Summary</div>
+    <div class="overall-snapshot">
+      <h3>Overall Snapshot</h3>
+      <div class="snapshot-grid">
+        <div class="snapshot-item">
+          <div class="snapshot-label">Total Hours</div>
+          <div class="snapshot-value">${totalHours}</div>
+        </div>
+        <div class="snapshot-item">
+          <div class="snapshot-label">Overall Avg. Engagement (by Class)</div>
+          <div class="snapshot-value">${avgEngagementByClass}%</div>
+        </div>
+        <div class="snapshot-item">
+          <div class="snapshot-label">Overall Avg. Engagement (by Student)</div>
+          <div class="snapshot-value">${avgEngagementByStudent}%</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // 2. 該班每人一行：姓名 + Attendance %、Engagement %
+  studentListSection.innerHTML = `
+    <h3 class="student-list-title">Student Insights</h3>
+    <table class="student-list-table">
+      <thead>
+        <tr><th>Name</th><th>Attendance %</th><th>Engagement %</th></tr>
+      </thead>
+      <tbody>
+        ${studentsWithRates.map(s => `
+          <tr>
+            <td class="student-name-cell">${s.name}</td>
+            <td>${s.attendanceRate}%</td>
+            <td>${s.engagementRate}%</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  
+  // 3. 該班詳細出席表（含老師出席列）
+  detailedTablesSection.innerHTML = await renderClassTable(classData, sessionMap, students);
+  
+  const tables = detailedTablesSection.querySelectorAll('.attendance-table');
+  tables.forEach(table => table.classList.add('hide-week-total'));
 }
 
-// 渲染單一班級表格
-async function renderClassTable(classData) {
-  // 取得該班級的所有 sessions
+// 渲染單一班級表格（可傳入已算好的 sessionMap、students 以避免重複查詢）
+async function renderClassTable(classData, sessionMapFromParent, studentsFromParent) {
+  let sessionMap = sessionMapFromParent;
+  let students = studentsFromParent;
   const classSessions = allSessions.filter(s => s.class_id === classData.id);
   
   if (classSessions.length === 0) {
@@ -158,34 +263,29 @@ async function renderClassTable(classData) {
     `;
   }
   
-  // 取得該班級的所有學生
-  const studentsRef = collection(db, `classes/${classData.id}/students`);
-  const studentsSnapshot = await getDocs(query(studentsRef, where('active', '==', true)));
-  
-  const students = [];
-  studentsSnapshot.forEach(doc => {
-    students.push({
-      id: doc.id,
-      name: doc.data().name
+  if (!students || !sessionMap) {
+    const studentsRef = collection(db, `classes/${classData.id}/students`);
+    const studentsSnapshot = await getDocs(query(studentsRef, where('active', '==', true)));
+    students = [];
+    studentsSnapshot.forEach(doc => {
+      students.push({
+        id: doc.id,
+        name: doc.data().name
+      });
     });
-  });
-  
-  students.sort((a, b) => a.name.localeCompare(b.name));
-  
-  // 建立日期到 session 的映射（只包含 paid_hours: 1 的 session）
-  const sessionMap = {};
-  classSessions.forEach(session => {
-    // 只包含老師實際出席的 session（paid_hours: 1）
-    // 排除已取消的 session（paid_hours: 0 或 cancelled: true）
-    const paidHours = session.paid_hours !== undefined ? session.paid_hours : 1; // 舊資料可能沒有 paid_hours，預設為 1
-    const isCancelled = session.cancelled || paidHours === 0;
+    students.sort((a, b) => a.name.localeCompare(b.name));
     
-    if (!isCancelled) {
-      const date = session.date.toDate();
-      const dateKey = date.toISOString().split('T')[0];
-      sessionMap[dateKey] = session.attendance || {};
-    }
-  });
+    sessionMap = {};
+    classSessions.forEach(session => {
+      const paidHours = session.paid_hours !== undefined ? session.paid_hours : 1;
+      const isCancelled = session.cancelled || paidHours === 0;
+      if (!isCancelled) {
+        const date = session.date.toDate();
+        const dateKey = date.toISOString().split('T')[0];
+        sessionMap[dateKey] = session.attendance || {};
+      }
+    });
+  }
   
   // 取得該月份的所有日期（固定從週一開始，顯示完整週曆）
   const selectedMonth = monthSelect.value;
@@ -289,9 +389,32 @@ async function renderClassTable(classData) {
         <tbody>
   `;
   
-  // 計算老師實際出席天數（預定時數）
-  // 預定時數 = 該月份該班級有 paid_hours: 1 的 sessions 的日期數量（排除已取消的 session）
   const scheduledDays = Object.keys(sessionMap).length;
+  
+  // 老師出席列
+  tableHtml += `<tr class="row-teacher"><td class="student-name">Teacher</td>`;
+  weeks.forEach(week => {
+    let weekTeacherDays = 0;
+    week.forEach(dateInfo => {
+      if (!dateInfo.isInMonth) {
+        tableHtml += `<td class="non-month-day"></td>`;
+        return;
+      }
+      if (!dateInfo.isClassDay) {
+        tableHtml += `<td class="non-class-day">-</td>`;
+        return;
+      }
+      const hasTeacher = sessionMap[dateInfo.dateKey] != null;
+      if (hasTeacher) {
+        weekTeacherDays++;
+        tableHtml += `<td class="status-teacher" title="Teacher present">✓</td>`;
+      } else {
+        tableHtml += `<td>-</td>`;
+      }
+    });
+    tableHtml += `<td class="week-total collapsible">${weekTeacherDays}</td>`;
+  });
+  tableHtml += `<td class="month-total">${scheduledDays}</td><td class="month-total">${scheduledDays}</td><td class="month-total">-</td><td class="month-total">-</td></tr>`;
   
   // 學生列
   students.forEach(student => {
@@ -440,9 +563,9 @@ async function handleExportExcel() {
 async function exportToExcel() {
   const selectedMonth = monthSelect.value;
   const selectedClassId = classSelectViewer.value;
-  const classesToExport = selectedClassId === 'all' 
-    ? allClasses 
-    : allClasses.filter(c => c.id === selectedClassId);
+  const classesToExport = selectedClassId
+    ? allClasses.filter(c => c.id === selectedClassId)
+    : [];
   
   const workbook = XLSX.utils.book_new();
   

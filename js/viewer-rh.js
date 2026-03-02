@@ -208,7 +208,7 @@ async function renderAll() {
 // 渲染 Executive Summary
 function renderExecutiveSummary() {
   if (allClasses.length === 0 || allSessions.length === 0) {
-    executiveSummary.innerHTML = '<div class="empty-state">No data available</div>';
+    executiveSummary.innerHTML = '<div class="empty-state">No data available.<br><em>No hay datos. Por favor seleccione el mes arriba.</em></div>';
     return;
   }
   
@@ -473,7 +473,7 @@ async function renderDetailedTables() {
   detailedTables.innerHTML = '<div class="loading">Loading...</div>';
   
   if (allClasses.length === 0 || allSessions.length === 0) {
-    detailedTables.innerHTML = '<div class="empty-state">No data available</div>';
+    detailedTables.innerHTML = '<div class="empty-state">No data available.<br><em>No hay datos. Por favor seleccione el mes arriba.</em></div>';
     return;
   }
   
