@@ -503,6 +503,17 @@ body {
   font-weight: 600;
 }
 
+/* 老師出席列 */
+.attendance-table tr.row-teacher {
+  background: #f0f9f4;
+  font-weight: 600;
+}
+
+.attendance-table .status-teacher {
+  color: #28a745;
+  font-weight: 600;
+}
+
 .week-total,
 .month-total {
   background: #f8f9fa;

@@ -627,6 +627,33 @@ async function renderClassTable(classData) {
   
   const scheduledDays = Object.keys(sessionMap).length;
   
+  // 老師出席列
+  tableHtml += `<tr class="row-teacher"><td class="student-name">Teacher</td>`;
+  weeks.forEach(week => {
+    let weekTeacherDays = 0;
+    week.forEach(dateInfo => {
+      const isInMonth = dateInfo.isInMonth;
+      const isClassDay = dateInfo.isClassDay;
+      if (!isInMonth) {
+        tableHtml += `<td class="non-month-day"></td>`;
+        return;
+      }
+      if (!isClassDay) {
+        tableHtml += `<td class="non-class-day">-</td>`;
+        return;
+      }
+      const hasTeacher = sessionMap[dateInfo.dateKey] != null;
+      if (hasTeacher) {
+        weekTeacherDays++;
+        tableHtml += `<td class="status-teacher" title="Teacher present">✓</td>`;
+      } else {
+        tableHtml += `<td>-</td>`;
+      }
+    });
+    tableHtml += `<td class="week-total collapsible">${weekTeacherDays}</td>`;
+  });
+  tableHtml += `<td class="month-total">${scheduledDays}</td><td class="month-total">${scheduledDays}</td><td class="month-total">-</td><td class="month-total">-</td></tr>`;
+  
   // 學生列
   students.forEach(student => {
     tableHtml += `<tr><td class="student-name">${student.name}</td>`;
@@ -876,6 +903,28 @@ async function exportToExcel() {
     });
     headerWeekday.push('', '', '', '');
     excelData.push(headerWeekday);
+    
+    // 老師出席列
+    const teacherRow = ['Teacher'];
+    weeks.forEach(week => {
+      let weekTeacherDays = 0;
+      week.forEach(dateInfo => {
+        if (!dateInfo.isInMonth) {
+          teacherRow.push('');
+          return;
+        }
+        if (!dateInfo.isClassDay) {
+          teacherRow.push('-');
+          return;
+        }
+        const hasTeacher = sessionMap[dateInfo.dateKey] != null;
+        teacherRow.push(hasTeacher ? '✓' : '');
+        if (hasTeacher) weekTeacherDays++;
+      });
+      teacherRow.push(weekTeacherDays);
+    });
+    teacherRow.push(scheduledDays, scheduledDays, '-', '-');
+    excelData.push(teacherRow);
     
     // 學生資料列
     students.forEach(student => {
